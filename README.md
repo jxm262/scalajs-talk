@@ -59,16 +59,69 @@ var car = new example.Car(2007, "honda")
 More commonly, we want to write most (or all) of our application in Scala.  To use existing JavaScript libraries, we need to create a _Facade_ type, which is basically a typed definition of the JS code in Scala.  To do this, the underlying facade must extend a js.Any type (usually with js.Object).  This essentially tells the compiler it's now a js "type" and will try to match the name of the object to it's corresponding JS code.
 
 ```
-simple example
+//javascript code (something you've imported you want to work with in Scala)
+var DemoJS = {
+    hello: function(v) {
+        return "hello " + v;
+    },
+
+    val: function() {
+
+    },
+
+    'hello property': "hello",
+
+    mynum: 3
+};
+
+//scala.js facade
+
+@js.native
+trait DemoJS extends js.Object {
+  def hello(v: String): String = js.native
+
+  @JSName("val")
+  def value(): Unit = js.native
+
+  @JSBracketAccess
+  def getHelloProperty(key: String): String = js.native
+
+  @JSBracketAccess
+  def setHelloProperty(key: String, value: String): Unit = js.native
+}
+object DemoJS extends DemoJS
+
+DemoJS.hello("world")  //"hello world"
+DemoJS.hello(3)        //compiler says NOOO!
 ```
 
 
 ##In-depth example
-Now that we have a basic idea of how this all works, let's dive into a more complete example.
+Now that we have a basic idea of how this all works, let's dive into a more complete example.  Here at Cibo I'm currently working on quite a bit of Data Visualization.  There's one particular maps library I've grown fond of called [Leaflet](http://leafletjs.com/reference-1.0.0.html).  There's quite a bit to this library, but the most basic part of it is the Map object which allows you to render things onto it.  Here's a small sample of the Leaflet API
 
++ `L.map(<String> id, <Map options> options?)`  
+    - accepts a String representing a dom element ID, and an optional Map options object
++ `L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png?{foo}', {foo: 'bar'}).addTo(map);`
+    - accepts a String representing a basemap urlTemplate, and an options object.  
+    - addTo method takes a map object to place the tileLayer object
+
+We can facade this out like so
 ```
-complex Leaflet example
+@JSName("L")
+@js.native
+object LeafletFacade extends js.Object {
+  def map(id: String): Map = js.native
+  def tileLayer(urlTemplate: String): TileLayer = js.native
+}
+
+//example usage
+val leafletMap = LeafletFacade.map("leaflet-map")
+val tileLayer = LeafletFacade
+  .tileLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}")
+  .addTo(leafletMap)
 ```
+
+In this case, instead of having the scala.js compiler automatically try to map the name LeafletFacade to it's corresponding JS object (which doesn't exist under that name), I've added a `@JSName` tag to indicate where to connect it.  I can now map "L" (the Leaflet "L" reference) to any name I wish.  I've then added on the other 2 methods as `js.native` and can now call them from within my Scala code.  Notice again, this is now all type safe!  
 
 ###Cool Things and Gotcha's
 Reading through the Scala.js docs, I was a bit confused on certain sections.  Particularly the blurb about Monkey Patching.  Yes, I know what monkey patching is, but the cited example didn't completely click for me until I really tried it myself.  Occassionally, you'll find yourself using some existing Facade library, where the underlying JS library allows you to extend onto it's Prototype (I'm looking at you jQuery).  
