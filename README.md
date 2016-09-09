@@ -42,12 +42,34 @@ complex Leaflet example
 ```
 
 ###Gotcha's and confusing parts
-Reading through the Scala.js docs, I was a bit confused on certain sections.  Particularly the blurb about Monkey Patching.  Yes, I know what monkey patching is, but the cited example didn't completely click for me until I really tried it myself.  Occassionally, you'll find yourself using some existing Facade library, where the underlying JS library allows you to extend onto it's Prototype (I'm looking at you jQuery).  For example, we've imported the JQuery facade into our app and have code that looks like this - 
+Reading through the Scala.js docs, I was a bit confused on certain sections.  Particularly the blurb about Monkey Patching.  Yes, I know what monkey patching is, but the cited example didn't completely click for me until I really tried it myself.  Occassionally, you'll find yourself using some existing Facade library, where the underlying JS library allows you to extend onto it's Prototype (I'm looking at you jQuery).  
+
+For example, we've imported the JQuery facade into our app and have code that looks like this - 
 ```
-...
+import org.scalajs.jquery.{jQuery}
+
+val datePicker = jQuery("#date-picker")
 ```
 
-But, what if we want to use another jQuery extension library, say jQueryUI, and need to write a facade for that.  
+But, what if we want to use another jQuery extension library, say the jQueryUI [DatePicker widget](https://api.jqueryui.com/datepicker/#entry-examples), and need to write a facade for that.  For example you want to _extend_ the jQuery prototype and add another function onto the JS library _which has already been facaded_.  You could facade out jQueryUI in your own code, and include a method on it, but then to use the original jQuery code, you'd have to refacade all of the original jQuery code yourself as well and not be able to reuse the library.  How can we just extend onto the initial library in a typesafe way?
+
+An easy method is to wrap the library with an implicit like so -
+```
+trait JQueryUI extends JQuery {
+  def datepicker(): this.type = ???
+}
+
+object JQueryUI {
+  implicit def jQueryUIExtensions(query: JQuery): JQueryUI =
+    query.asInstanceOf[JQueryUI]
+```
+
+Now we can do this.  Note we can call jQuery just as before but it now has `datepicker` function attached to it.  The JQueryUI library extended this method onto the prototype and we've now wrapped someone else's facade into our own Type!  
+```
+import org.scalajs.jquery.{jQuery}
+
+import JQueryUI._
+val datePicker = jQuery("#date-picker").datepicker()
+```
 
 
-##Sample repo and testing
