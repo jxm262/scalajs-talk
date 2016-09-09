@@ -41,7 +41,7 @@ Now that we have a basic idea of how this all works, let's dive into a more comp
 complex Leaflet example
 ```
 
-###Gotcha's and confusing parts
+###Cool Things and Gotcha's
 Reading through the Scala.js docs, I was a bit confused on certain sections.  Particularly the blurb about Monkey Patching.  Yes, I know what monkey patching is, but the cited example didn't completely click for me until I really tried it myself.  Occassionally, you'll find yourself using some existing Facade library, where the underlying JS library allows you to extend onto it's Prototype (I'm looking at you jQuery).  
 
 For example, we've imported the JQuery facade into our app and have code that looks like this - 
@@ -72,4 +72,47 @@ import JQueryUI._
 val datePicker = jQuery("#date-picker").datepicker()
 ```
 
+One gotcha to note is that while we're able to Facade out a library that has extended some other Facaded library's Prototype, we can't update the prototype directly ourselves in a type safe way.
+
+For example, in our previous Leaflet example, let's say we want to add a `createTile` method onto the `GridLayer` prototype.  The [GridLayer docs](http://leafletjs.com/reference-1.0.0.html#gridlayer) show an example of this, where they use a helper function `extend` allowing you to mixin an object into the prototype.  
+
+So how can we convert this functionality below into Scala.js? 
+```
+var CanvasLayer = L.GridLayer.extend({
+    createTile: function(coords){
+        // create a <canvas> element for drawing
+        var tile = L.DomUtil.create('canvas', 'leaflet-tile');
+        // setup tile width and height according to the options
+        var size = this.getTileSize();
+        tile.width = size.x;
+        tile.height = size.y;
+        // get a canvas context and draw something on it using coords.x, coords.y and coords.z
+        var ctx = tile.getContext('2d');
+        // return the tile so it can be rendered on screen
+        return tile;
+    }
+});
+``` 
+
+Without creating your own actual JavaScript code and facading that, the only way is to actually make the GridLayer a js.Dynamic type and adding your method onto it.  
+```
+val canvasLayer = L.gridLayer()
+canvasLayer.asInstanceOf[js.Dynamic].createTile = () => {
+  val canvas = dom.document.createElement("canvas").asInstanceOf[Canvas]
+  val ctx = canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
+  canvas.width = 50
+  canvas.height = 50
+  ctx.fillStyle = "white"
+  ctx.strokeStyle = "red"
+  ctx.beginPath()
+  ctx.moveTo(0, 0)
+  ctx.lineTo(255, 0)
+  ctx.lineTo(255, 255)
+  ctx.lineTo(0, 255)
+  ctx.closePath()
+  ctx.stroke()
+  canvas
+}
+```
+Notice we've declared assigned a GridLayer to a canvasLayer, converted it to js.Dynamic type, and added a method onto it.  This gets compiled down to the gridlayer object, but with the extra creatTile method attached.  It works, but converting to js.Dynamic negates the awesome power of type safety.  
 
