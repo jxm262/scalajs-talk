@@ -9,22 +9,51 @@ Scala.js code works by mapping Scala types to their corresponding JavaScript typ
 
 For example - 
 ```
-todo...
+//javascript
+function squareNum(i) {
+  return i*i;
+}
+squareNum(3)  //9
+
+//scala.js
+def squareNum(i: Int): Int = i*i
+squareNum(3)  //9
 ```
 
 When making an error, notice the immediate benefit of the Scala compiler
 ```
-example
+//javascript
+squareNum("oops")  //9
+
+//scala.js
+squareNum("oops")  //compiler says NOOO!
+
+<console>:13: error: type mismatch;
+ found   : String("oops")
+ required: Int
+       squareNum("oops")
 ```
 
 ##From Scala to JS
 To make Scala code available to JavaScript, we can export it with the `@JSExport` tag.  
 ```
-example
-```
-  
-This allows us to call the exported code directly from JavaScript.  
+package example
 
+@JSExport 
+object Car {
+  val year: Int = 2007
+  val make: String = "Honda"
+} 
+
+//can also make classes if you want to new something up with constructor params
+@JSExport
+class Car(@(JSExport @field) val year: Int,
+          @(JSExport @field) val make: String)
+```  
+This allows us to call the exported code directly from JavaScript.  
+```
+var car = new example.Car(2007, "honda")
+```
 
 ##From JS to Scala
 More commonly, we want to write most (or all) of our application in Scala.  To use existing JavaScript libraries, we need to create a _Facade_ type, which is basically a typed definition of the JS code in Scala.  To do this, the underlying facade must extend a js.Any type (usually with js.Object).  This essentially tells the compiler it's now a js "type" and will try to match the name of the object to it's corresponding JS code.
