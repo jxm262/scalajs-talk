@@ -19,7 +19,11 @@ example
 
 ##From Scala to JS
 To make Scala code available to JavaScript, we can export it with the `@JSExport` tag.  
-
+```
+example
+```
+  
+This allows us to call the exported code directly from JavaScript.  
 
 ##From JS to Scala
 
