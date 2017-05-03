@@ -1,9 +1,9 @@
-# Scala.js - A deep dive into using JavaScript in a type safe way.
+## Scala.js - A deep dive into using JavaScript in a type safe way.
 
-## Info
+### Info
 This is my Scala.js presentation given at various meetups.  Slides for the actual talk are in [the powerpoint file](https://github.com/jxm262/scalajs-talk/blob/master/Scalajs-talk.pptx).  
 
-## Demo
+### Demo
 The example application is located under the `/demo` directory and may be compiled/run to highlight the features of Scala.js.  To run locally - 
 1. clone the repo and navigate to /demo 
 2. run `sbt fastOptJS` to compile scala.js to javascript
