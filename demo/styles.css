@@ -1,0 +1,20 @@
+
+.left {
+    display: inline-block;
+    width: 50%;
+}
+
+.right {
+    display: inline-block;
+    width: 50%;
+}
+
+#leaflet-map {
+    margin-top: 50px;
+    width: 500px;
+    height: 300px;
+}
+
+#scalatag-container button {
+    display: block;
+}

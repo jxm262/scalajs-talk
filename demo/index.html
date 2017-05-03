@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Scala.js</title>
+    <link href="https://npmcdn.com/leaflet@1.0.0-rc.2/dist/leaflet.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="./styles.css">
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.0-rc.2/leaflet.css">-->
+</head>
+<body>
+
+
+<div>Text: </div>
+<div id="content">
+</div>
+
+<div id="leaflet-map"></div>
+
+<div class="hello">
+    hello world
+</div>
+
+
+<!-- external JS libraries -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.0-rc.2/leaflet.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.js"></script>
+<script type="text/javascript" src="./target/scala-2.11/scala-js-demo-jsdeps.js"></script>
+
+<!--my demo js file-->
+<script type="text/javascript" src="./my-library.js"></script>
+
+
+<!-- scalajs compiled file -->
+<script type="text/javascript" src="./target/scala-2.11/scala-js-demo-fastopt.js"></script>
+
+<!-- Run example DemoApp from above imported file-->
+<script type="text/javascript">
+      example.Demo().main();
+</script>
+
+</body>
+</html>
